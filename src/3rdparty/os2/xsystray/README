@@ -1,0 +1,140 @@
+Extended system tray widget for XCenter/eCenter
+
+Version 0.1.1 (28-03-2011)
+
+Copyright (C) 2009-2011 Dmitriy Kuminov
+
+Extended system tray widget is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, in version 2 as it comes in
+the "COPYING" file of the Extended system tray widget distribution. This
+program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+more details.
+
+
+
+INTRODUCTION
+
+The extended system tray widget is a plugin for XCenter that provides support
+for the system tray area in the XCenter bar. This area, also called as the
+notification or indicator area, is commonly used by long running applications
+to display their status using graphical icons and to provide a way to control
+these applications by clicking on their icons.
+
+There is a number of other tools to implement the described functionality (for
+example, SysTray/WPS by Dmitry Zaharov and the XCenter plugin for it by Eugene
+Romanenko). The main reason to create yet another implementation is that
+existing ones do not provide the level of functionality required by the Qt
+toolkit for which this extended implementation was created for.
+
+Note that since the SysTray/WPS API is being already used by a number of OS/2
+applications to implement system tray icons (e.g. PM Downloader, CoolFM), the
+Extended system tray widget implements this API as well to provide backward
+compatibility. See the API file for more information.
+
+The word "extended" in the widget name is used to distinguish from the XCenter
+widget by Eugene Romanenko and also to indicate that this one provides some
+extended functionality (for example the ability to add any valid icon to the
+tray, not only the frame window's icon).
+
+
+
+XSYSTRAY API
+
+The Extended system tray widget application also provides a DLL and an import 
+library containing the easy-to-use API for applications that want to add icons
+to the system tray area. The API DLL is installed together with the widget
+plugin, the import library with the C header file is contained in a separate
+package within the installation archive.
+
+This API is in particular used by the OS/2 version of the Qt4 toolkit and 
+by the OpenJDK framework.
+
+The API documentation is contained in the supplied C header file.
+
+
+
+MANUAL INSTALLATION
+
+In order to manually install the extended system tray widget plugin to XCenter,
+copy <plugin>\xsystray.dll to
+
+    <XWorkplace installation folder>\plugins\xcenter\
+
+If you are using eCenter (rebranded XCenter included in the latest eComStation
+releases), copy xsystray.dll to
+
+    <Boot drive>:\ecs\system\ewps\plugins\xcenter\
+
+Also, copy <dll>\xsystray.dll to some path listed in your LIBPATH environment
+variable. This DLL is necessary for all applications using XSYSTRAY API for
+interfacing with the Extended system tray.
+
+Then you should close all XCenter instances and start them again. The system
+tray widget will appear in the widget list under the name "Extended system
+tray".
+
+
+
+MANUAL UPGRADING
+
+If you are upgrading from the previous version, you should do the following:
+
+  - Unlock the old plugins\xcenter\xsystray.dll file (for example, using
+    unlock.exe from the lxlite package).
+
+  - Overwrite it with the new <plugin>\xsystray.dll file.
+
+  - Stop all applications using <%LIBPATH%>\xsystray.dll file.
+
+  - Overwrite it with the new <dll>\xsystray.dll file.
+
+  - Restart WPS. Note that restarting XCenter is not enough since the old DLL
+    will remain loaded in this case.
+
+The new version should be now picked up automatically.
+
+
+
+HISTORY
+
+
+0.1.1 (28-03-2011)
+
+  Improvements:
+
+  - Separate WPI archive (still hosted within the Qt4 SVN).
+
+  - Added a 2px horizontal padding when no icons are shown, to make it possible
+    to move the widget and call its context menu with the mouse.
+
+  - Added a tooltip "Indicator area" shown when the mouse is over the padding
+    zone between and around icons (also when no icons are shown, in which case
+    "(empty)" is added to the tooltip string).
+
+  Fixes:
+
+  - xsystray version was wrongly reported as 1.0.0 instead of 0.1.0.
+
+
+0.1.0 (11-11-2009, released as part of Qt4 Beta 4)
+
+  - Initial release.
+
+  
+
+CREDITS AND COPYRIGHTS
+
+This product uses code from the XWorkplace project (c) by Ulrich Moeller.
+
+SysTray/WPS is copyright (c) by 1999-2002 OS2.Ru DevTeam.
+Syswray widget is copyright (c) by Eugene Romanenko.
+
+Qt is a trademark of Nokia Corporation and/or its subsidiary(-ies).
+OS/2 and OS/2 Warp are trademarks of the IBM Corporation and/or its subsidiary(-ies).
+eComStation is a trademark of Serenity Systems International and/or its subsidiary(-ies).
+
+Etc.
+
