@@ -1,0 +1,89 @@
+!CONFIG(windows):!CONFIG(console) {
+    CONFIG(release, debug|release):CONFIG(qt):contains(QT, gui) {
+        CONFIG *= windows
+    } else {
+        CONFIG *= console
+    }
+}
+
+# load the global default_post
+load(default_post)
+
+defineTest(countVal) {
+    unset(filter)
+    filter = $$find($$1, $$2)
+    isEmpty(4):4 = =
+    count(filter, $$3, $$4):return(true)
+    return(false)
+}
+
+build_pass|isEmpty(BUILDS) {
+
+    # apply the 'sym' default (unless explicitly added or removed)
+    !isEmpty(QMAKE_MAPSYM):countVal(CONFIG, sym, 1):CONFIG(debug, debug|release):CONFIG -= sym
+
+    # convert QMAKE_TARGET_ variables to DEF_FILE_ ones
+    isEmpty(DEF_FILE_VERSION) {
+        !isEmpty(QMAKE_TARGET_VERSION):DEF_FILE_VERSION = $$QMAKE_TARGET_VERSION
+        else:DEF_FILE_VERSION = $$VERSION
+    }
+    isEmpty(DEF_FILE_DESCRIPTION) {
+        !isEmpty(QMAKE_TARGET_PRODUCT):DEF_FILE_DESCRIPTION = $$QMAKE_TARGET_PRODUCT
+        !isEmpty(QMAKE_TARGET_DESCRIPTION) {
+            !isEmpty(DEF_FILE_DESCRIPTION):DEF_FILE_DESCRIPTION = $${DEF_FILE_DESCRIPTION}: $$QMAKE_TARGET_DESCRIPTION
+            else:DEF_FILE_DESCRIPTION = $$QMAKE_TARGET_DESCRIPTION
+        }
+        !isEmpty(QMAKE_TARGET_COPYRIGHT) {
+            !isEmpty(DEF_FILE_DESCRIPTION):DEF_FILE_DESCRIPTION = $${DEF_FILE_DESCRIPTION} $$QMAKE_TARGET_COPYRIGHT
+            else:DEF_FILE_DESCRIPTION = $$QMAKE_TARGET_COPYRIGHT
+        }
+    }
+    isEmpty(DEF_FILE_VENDOR):!isEmpty(QMAKE_TARGET_COMPANY):DEF_FILE_VENDOR = $$QMAKE_TARGET_COMPANY
+
+    contains(TEMPLATE, ".*lib"):dll {
+        # create the import library target (assumes that the generator puts
+        # puts 'TARGET_IMPLIB... = ' to the Makefile)
+        make_implib.target = $(TARGET_IMPLIB)
+        make_implib.commands = $$QMAKE_RUN_IMPLIB
+        export_all:make_implib.depends = $(DEF_FILE)
+        else:make_implib.depends = $(DESTDIR_TARGET)
+        ALL_DEPS += $$make_implib.target
+        QMAKE_CLEAN += $$make_implib.target
+        QMAKE_EXTRA_TARGETS += make_implib
+
+        isEmpty(DEF_FILE) {
+            # create a .DEF file if not supplied (assumes that the generator
+            # puts 'DEF_FILE_... = ' $$DEF_FILE... to the Makefile)
+            make_def.target = $(DEF_FILE)
+            make_def.depends = $(MAKEFILE)
+            !isEmpty(DEF_FILE_TEMPLATE):make_def.depends += $(DEF_FILE_TEMPLATE)
+            !isEmpty(DEF_FILE_MAP):make_def.depends += $(DEF_FILE_MAP)
+            export_all:make_def.depends += $(OBJECTS)
+            export_all:make_def.commands = $$QMAKE_RUN_GENDEF_EXPORT_ALL
+            else:make_def.commands = $$QMAKE_RUN_GENDEF
+            QMAKE_CLEAN += $$make_def.target
+            QMAKE_EXTRA_TARGETS += make_def
+        }
+        POST_TARGETDEPS += $(DEF_FILE)
+    }
+
+    contains(TEMPLATE, ".*app") {
+        isEmpty(DEF_FILE) {
+            # handle .DEF file creation for executables
+            !isEmpty(DEF_FILE_VERSION)|!isEmpty(DEF_FILE_DESCRIPTION)|\
+            !isEmpty(DEF_FILE_VENDOR)|!isEmpty(DEF_FILE_TEMPLATE) {
+                windows:DEF_FILE_EXETYPE = WINDOWAPI
+                else:DEF_FILE_EXETYPE = WINDOWCOMPAT
+                make_def.target = $(DEF_FILE)
+                make_def.depends = $(MAKEFILE)
+                !isEmpty(DEF_FILE_TEMPLATE):make_def.depends += $(DEF_FILE_TEMPLATE)
+                make_def.commands = $$QMAKE_RUN_GENDEF_EXE
+                QMAKE_CLEAN += $$make_def.target
+                QMAKE_EXTRA_TARGETS += make_def
+                POST_TARGETDEPS += $$make_def.target
+            }
+        } else {
+            POST_TARGETDEPS += $(DEF_FILE)
+        }
+    }
+}
