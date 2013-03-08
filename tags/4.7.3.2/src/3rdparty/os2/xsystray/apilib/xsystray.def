@@ -1,7 +1,0 @@
-;
-; module definition file for XSYSTRAY.DLL which
-; provides Extended system tray public API
-;
-
-LIBRARY XSYSTRAY INITINSTANCE TERMINSTANCE
-DESCRIPTION '@#netlabs.org:0.1.1#@ Extended system tray API'
