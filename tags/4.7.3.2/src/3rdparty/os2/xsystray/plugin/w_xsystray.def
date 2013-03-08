@@ -1,0 +1,20 @@
+;
+; module definition file for XSYSTRAY.DLL, an XCenter
+; plug-in widget DLL.
+;
+
+LIBRARY XSYSTRAY INITGLOBAL TERMGLOBAL
+Description '@#netlabs.org:0.1.1#@ Extended system tray widget DLL for XCenter'
+PROTMODE
+
+DATA              MULTIPLE READWRITE LOADONCALL NONSHARED
+;       doesn't really matter, because the widget is only ever used
+;       in the WPS process; we use MULTIPLE NONSHARED here to reduce
+;       the amount of shared memory that is needed for the DLL
+
+CODE              LOADONCALL
+
+EXPORTS
+    WgtInitModule      @1
+    WgtUnInitModule    @2
+    WgtQueryVersion    @3

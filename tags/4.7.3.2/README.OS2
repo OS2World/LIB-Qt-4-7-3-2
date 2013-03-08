@@ -1,0 +1,667 @@
+This is Qt version 4.7.3 for OS/2 and eCS.
+
+This document contains a brief information on the OS/2 version of the Qt
+library. Please read it carefully before starting your work. You may also
+visit the project page at
+
+  http://svn.netlabs.org/qt4/wiki
+
+to get more information and the latest news and also to report bugs.
+
+To get a brief list of OS/2-specific changes from release to release
+please see the CHANGES.OS2 file included in this distribution.
+
+IMPORTANT NOTE:
+
+    Please consider reading section called "USING OFFICIAL BINARY QT ARCHIVES"
+    below before getting into details of the manual compilation of the
+    Qt toolkit -- to learn the easiest way of getting it work.
+
+
+
+REQUIREMENTS
+
+In order to compile the Qt library and Qt-based applications, you will need
+the following tools:
+
+  - One of the OS/2 Warp 4, OS/2 Warp 4.5 or eComStation operating systems.
+
+  - GCC compiler version 4.4.5 for OS/2 or above, patched OpenWatcom linker and
+    GNU Make 3.81beta1 or above. The GCC compiler must be set up to use the
+    OpenWatcom linker for linking.
+
+    If you do not have a working GCC environment with the above requirements, it
+    is recommended to download a ready-to-use GCC 4.4.5 distribution from here:
+
+      ftp://ftp.netlabs.org/pub/qt4/gcc-4_4_5-complete-20110303.zip
+
+    This distribution includes all tools necessary to compile and build the Qt
+    library from the source code. Just follow the installation instructions
+    contained in the README file inside this ZIP archive to set up the GCC
+    environment.
+
+    Please note that starting from Qt 4.6.2, support for GCC 3.3.5 and earlier
+    versions of the compiler has been dropped and the Qt library will most
+    likely not build if you use one of these compilers. Later versions prior to
+    GCC 4.4.2 may work but they are not tested and not supported.
+
+  - IBM RC (Resource Compiler) Version 5.00.007 (comes with OS/2 Toolkit 4.5)
+    or Version 4.00.011 (comes with eCS 2.0). Other versions may not work
+    correctly.
+
+There is also a set of optional tools which are necessary to enable the selected
+features of the Qt library. If these tools are missing, the Qt configuration
+script (discussed in section "COMPILING QT" below) will automatically disable
+the corresponding feature:
+
+  - Perl 5.8.2 or above. This is required if you want to perform a shadow build
+    of the Qt library (which is a recommended way to go). Please refer to
+    section "COMPILING QT" for more information about shadow builds. Recent
+    builds of Perl for OS/2 are available here:
+
+      http://os2ports.smedley.info/index.php?page=perl
+
+  - MAPSYM 4.00.000 (Oct 4 2001) to enable generation of symbol (.SYM) files for
+    DLLs and executables. This tool comes with OS/2 Toolkit 4.5. Note that other
+    versions of this tool may not work correctly.
+
+  - LxLite 1.3.3 or above (not tested) to enable the compression of DLLs and
+    executables (which saves hard disk space and application startup time). If
+    you use a recent version of eComStation (e.g. 2.0 rc6) you will already have
+    LxLite installed. Otherwise, you may take it from here:
+
+      http://www.os2site.com/sw/util/archiver/lxlt133.zip
+
+  - CUPS 1.4.8 or later to support printing in Qt. The CUPS libraries are
+    available at:
+
+      http://sourceforge.net/projects/ecsports/files/CUPS/cups-1.4.8-os2-20110831.zip/download
+      http://svn.netlabs.org/ecups/wiki/CupsPort
+
+  - OpenSSL 0.9.8o or later to support OpenSSL in Qt. The OpenSSL libraries are
+    available at:
+
+      http://bauxite.sakura.ne.jp/tmp/os2/openssl-1.0.0a-os2knix-20100706-runtime.zip
+      http://bauxite.sakura.ne.jp/tmp/os2/openssl-1.0.0a-os2knix-20100706-dev.zip
+
+  - MySQL 5.1 or later for the MySQL Qt plugin. The MySQL libraries are
+    available at:
+
+      http://download.smedley.info/mysql-5.1.51-os2-20101001.zip
+
+    Linking against this MySQL build also requires pthread.lib:
+
+      http://web.os2power.com/download/lib/pthread-20100217-os2.zip
+
+    Note that you will also need the above OpenSSL libraries to be able to use
+    this MySQL build. The MySQL Qt plugin itself will require OpenSSL DLLs in
+    your LIBPATH at runtime.
+
+  - PostgersSQL 9.0.1 or later to support the PostgresSQL Qt plugin. The
+    PostgresSQL libraries are available at:
+
+      http://download.smedley.info/postgresql-9.0.1-os2-20101108.zip
+
+    Note that you will also need libc064x.dll for this PostgresSQL build:
+
+      http://download.smedley.info/libc064x.zip
+
+    Note that you will also need the above OpenSSL libraries and pthread.lib to
+    be able to use this PostgresSQL build. The PostgresSQL Qt plugin itself will
+    require OpenSSL DLLs in your LIBPATH at runtime.
+
+
+
+SETTING UP THE ENVIRONMENT
+
+First of all, make sure that your GCC environment is set up and meets the
+specified requirements. To perform a quick check, you may run the following
+command:
+
+  gcc --version && make --version && wl /version
+
+If the setup is done properly, it will print the versions of the key tools
+to the console.
+
+The next step is to set up the Qt environment. If you installed the Qt
+development libraries from the WPI archive (refer to section "USING OFFICIAL
+BINARY QT ARCHIVES" below for more details about existing WPI archives), you
+will only need to run the supplied "QtEnv.cmd" script which will do all the
+setup job for you. The script is located in the directory where you installed
+the developmnent libraries (or in the WPS folder created by the WPI installer).
+Execute this script in a command line session to make it ready for building
+Qt 4 applications (for example, using the "qmake" command follwed by "make"
+for applications based on qmake project files which most of them are). If you
+go that way, you may skip the rest of this section and proceed directly to
+section "USING OFFICIAL BINARY QT ARCHIVES" below.
+
+If you use the full source code ZIP distribution of the Qt library or work
+directly with the Qt SVN tree, you will need to set up the environment yourself
+by performing the following steps:
+
+  - Add the "bin" subdirectory of the directory where you unpacked the Qt4
+    source tree to PATH and BEGINLIBPATH, like this:
+
+      set PATH=D:\Coding\Qt4\bin;%PATH%
+      set BEGINLIBPATH=D:\Coding\Qt4\bin;%BEGINLIBPATH%
+
+  - Add the system DLLs to the GCC library path with the following command:
+
+      set LIBRARY_PATH=C:\OS2\DLL;C:\MPTN\DLL;%LIBRARY_PATH%
+
+    where C: is your boot drive.
+
+  - Make sure CMD.EXE is your command line processor (the generated makefiles
+    will rely on its 'copy', 'if' and other commands). If you have a Unix shell
+    (SH.EXE) in your environment, you may need to force GNU make to use CMD.EXE
+    by executing the followingn command:
+
+       set MAKESHELL=C:\OS2\CMD.EXE
+
+    where C: is your boot drive.
+
+Note that the QTDIR environment variable used in previous Qt versions is not
+used in Qt4 anymore. Therefore, there is no need to set this variable
+explicitly.
+
+There is also no need to set the QMAKESPEC variable explicitly. If it is absent,
+qmake will use the specification stored in the <Qt4_Home>/mkspecs/default
+directory, which on OS/2 always refers to the "os2-g++" specification, the only
+one supported at the present time.
+
+NOTE:
+
+    It is especially important to make sure that there are no traces of any
+    other Watcom or OpenWatcom installation in the environment where you build
+    Qt as it will interfere with the patched OpenWatcom linker we use. This
+    basically means removing all environment variables containing "WATCOM" in
+    their names and also removing references to all those Watcom installations
+    from PATH.
+
+
+
+SETTING UP OPTIONAL TOOLS
+
+The following list describes the steps necessary to set up the optional tools
+that the Qt library depends on:
+
+  - Unzip the CUPS libraries to some directory and set the following environment
+    variables to tell the Qt configure script its location:
+
+      set CUPS_INCLUDEPATH=<path_to_CUPS>\include
+      set CUPS_LIBS=
+
+    Note that you will also need to add the location of cups.dll to BEGINLIBPATH
+    (if it is not already in your LIBPATH) so that Qt applications can find it
+    at runtime:
+
+      set BEGINLIBPATH=<path_to_CUPS>\sbin;%BEGINLIBPATH%
+
+  - Unzip the OpenSSL libraries to some directory and set the following
+    environment variables to tell the Qt configure script its location:
+
+      set OPENSSL_INCLUDEPATH=<path_to_OpenSSL>\include
+      set OPENSSL_LIBS=
+
+    Note that you will also need to add the location of OpenSSL DLLs to
+    BEGINLIBPATH (if they are not already in your LIBPATH) so that Qt
+    applications can find them at runtime:
+
+      set BEGINLIBPATH=<path_to_OpenSSL>\dll;%BEGINLIBPATH%
+
+  - Unzip the MySQL archive to some directory and set the following environment
+    variables to tell the Qt configure script the library location:
+
+      set MYSQL_INCLUDEPATH=<path_to_MySQL>\include'
+      set MYSQL_LIBS=-L<path_to_MySQL>\lib -lmysqlclient_r -L<path_to_OpenSSL>\lib -llibssl -llibcrypto -L<path_to_pthread> -lpthread
+
+    Note that you will also need to place OpenSSL DLLs to BEGINLIBPATH (as
+    described above) because the MySQL plugin links statically to them and Qt
+    will not be able to load it otherwise.
+
+  - Unzip the PostgresSQL archive to some directory and set the following
+    environment variables to tell the Qt configure script the library location:
+
+      set PSQL_INCLUDEPATH=<path_to_PostgresSQL>\include'
+      set PSQL_LIBS=-L<path_to_PostgresSQL>\lib -llibpq -L<path_to_OpenSSL>\lib -llibssl -llibcrypto -L<path_to_pthread> -lpthread
+
+    Note that you will also need to place OpenSSL DLLs to BEGINLIBPATH (as
+    described above) because the PostgresSQL plugin links statically to them and
+    Qt will not be able to load it otherwise.
+
+Note that you need to make sure that OpenSSL DLLs are in BEGINLIBPATH or in
+LIBPATH before Qt attempts to load the SQL plugins for the first time. If it
+fails to load them, it will cache a failure and will not retry even if the
+plugins can be loaded later. To fix that, you need to delete the file
+%HOME%\.config\Trolltech.ini where this cache is stored.
+
+
+
+COMPILING QT
+
+When the environment is set up as described above, you may build the Qt library.
+There are two distinct ways of doing this: in the source tree or in a separate
+directory of your choice. In the first case, all results of the build process
+(intermediate object files as well as final executables and DLLs) will be placed
+right in the source tree. In the second case, they will be placed in the
+separate directory -- this is called a shadow build.
+
+Shadow builds are the recommended way to go because they keep the source
+directories clean and also allow to use the same source tree for creating any
+number of builds, each with its own build options.
+
+To perform a shadow build, do the following steps:
+
+  1. Create a directory outside the Qt4 source tree.
+
+  2. Go to that directory.
+
+  3. Type:
+
+     <source_tree>\configure.cmd
+
+     where <source_tree> is the directory containing the Qt4 source tree. This
+     will create all necessary configuration files, headers, Makefiles and will
+     also build the qmake tool which is necessary to control the rest of the
+     build process (note that building qmake will take some time).
+
+  4. Once the configure process is finished, type:
+
+     make
+
+  Note that by the default the shadow build will produce the release version of
+  the Qt library. This may be changed by passing command line options to
+  configure.cmd at step 3. For example, the debug build can be requested using
+  the '-debug' option. For a full list of options supported by configure.cmd,
+  type:
+
+     configure.cmd -h
+
+To perform a normal build, you execute 'configure.cmd' followed by 'make' right
+in the directory containing the Qt4 source tree. The default in this case is to
+build both the debug and release versions of the Qt library.
+
+Please keep in mind that in case of the dual debug and release build (where both
+flavors are stored in the same build directory), only DLL and LIB files will be
+separated (because the debug versions of them will have the 'd' suffix in the
+file name). Executable files are normally taken from the release build but,
+since the file names are identical, sometimes they may be overwritten by the
+debug versions (e.g. when you rebuild parts of the library later). For this
+reason, performing dual builds is not recommended.
+
+The Qt library is huge so the build process will take several hours (or even
+several dozen of hours) depending on your hardware and configure options.
+
+Once the library is successfully built, you may try to compile the demos and
+examples by visiting the individual example subdirectories in the source tree
+and typing 'qmake' followed by 'make'.
+
+NOTE:
+
+     This version of Qt for OS/2 includes the Extended system tray plugin for
+     XCenter/eCenter which is necessary to enable Qt support for the special
+     notification area on the XCenter/eCenter panel (called the "system tray")
+     which is used by many long-running applications to display their status.
+     In order to activate this support, you need to install this plugin to your
+     XCenter or eCenter. The plugin is split in two DLLs, the plugin DLL and
+     the API DLL. Both are built as part of the normal build process and can be
+     found in the "src\3rdparty\os2\xsystray\tmp\dist" subdirectory of the Qt
+     build tree. In order to install them, do the following:
+
+     a. Copy "plugin\xsystray.dll" to "<XWorkplace_install>\plugins\xcenter\"
+        (on eComStation, this will be "C:\ecs\system\ewps\plugins\xcenter\"
+        where C: is your boot drive).
+
+     b. Copy "apilib\xsystray.dll" to a directory listed in LIBPATH.
+
+     b. Restart WPS.
+
+     c. Add the "Extended system tray" widget to the XCenter/eCenter panel using
+        the XCenter context menu ('Create new widget').
+
+     Note that if you upgrade from the previous version of the plugin then
+     please unlock xsystray.dll in the target folder using the UNLOCK.EXE
+     utility (which you can find in the LxLite package, for example) before
+     performing step a., otherwise the copy operation will fail.
+
+IMPORTANT NOTE:
+
+     Please take into account that the Qt library you build on your own as
+     described above is NOT intended for wide distribution with Qt applications
+     you port or create. Such private Qt builds help you develop Qt applications
+     (because you can easily debug your program and parts of the Qt framework at
+     the source level) but being widely distributed they will create a so-called
+     DLL hell when a program running on a user computer crashes because it picks
+     up a wrong build of the Qt library. This will happen because even a single
+     change to Qt configuration options may make your build binary incompatible
+     with another build. And even if you convince the user to isolate different
+     DLLs (using LIBPATHSTRICT and BEGINLIBPATH) it will create another major
+     problem: two different Qt applications will load two different copies of Qt
+     into memory which will create an unnecessary overhead by doubling the
+     amount of used system resources.
+
+     In order to nicely solve this problem, netlabs.org provides the official
+     binary builds of the Qt library distributed as RPM packages which are
+     described in the next section.
+
+
+
+USING OFFICIAL BINARY QT ARCHIVES
+
+For your convenience, netlabs.org provides all components of the Qt toolkit in
+the form of RPM packages. You may install latest versions of these packages
+from the netlabs.org RPM repositories using the YUM tool. For example, this
+command:
+
+     yum install qt4-devel-kit
+
+will install the complete Qt development environment, including headers,
+libraries, tools, examples and the Qt API documentaiton.
+
+This environment is also a proper way to build Qt applications you want to
+distribute because it guarantees that a proper version of the Qt runtime will
+be used by your applications when they are installed on the end user's machine.
+
+Buiding applications using this development environment is similar to using
+your own build of Qt but it is simpler in many ways because you don't need to
+set up paths to Qt tools and libraries and so on -- the RPM installation
+procedure will do this for you.
+
+If you don't have YUM or RPM installed, please visit the following page to
+learn how to do that:
+
+    http://svn.netlabs.org/rpm
+
+
+
+
+QMAKE CONFIG OPTIONS
+
+The following CONFIG options of the qmake tool have a special meaning in OS/2:
+
+  windows           Turns on generation of PM (WINDOWAPI) executables. By
+                    default, this option is set for release builds that link
+                    to the Qt GUI library.
+
+  console           Turns on generation of text mode (WINDOWCOMPAT) executables.
+                    By default, this option is set when setting the "windows"
+                    option is not appropriate (see above).
+
+In addition, qmake recognizes the following OS/2-specific CONFIG options:
+
+  map               Turns on generation of the .map files for executables and
+                    DLLs. Note that this option is not set by default.
+
+  sym               Turns on generation of the .sym files for executables and
+                    DLLs. The option is turned on by default if configure.cmd
+                    is able to find the MAPSYM tool in PATH.
+
+  exepack           Turns on compression for executables and DLLs. The option is
+                    turned on by default for release builds if configure.cmd
+                    is able to find a compression tool (LxLite) in PATH.
+
+  highmem           Turns on high memory usage for dynamically allocated memory
+                    in DLLs and executables. When this option is set, a special
+                    compiler flag (-Zhigh-mem for GCC) is used to enable high
+                    memory support in the C library (LIBC). This option is set
+                    by default so that all Qt DLLs and Qt applications built
+                    with qmake are enabled for high memory. Note that high
+                    memory support must be enabled for all LIBC-based DLLs
+                    linked to the executable as well as for the executable
+                    itself: high memory usage will be disabled if one of them
+                    votes against it.
+
+  export_all        Cause the linker to export all public symbols in a generated
+                    DLL. By default (when this option is absent), only the
+                    symbols marked with the __declspec(dllexport) compiler
+                    directive in the source files.
+
+
+
+PRINTING SUPPORT
+
+Starting with version 4.6.2, Qt for OS/2 supports printing through the CUPS
+framework (provided that this support is enabled when building Qt, see the
+respective sections in the beginning of this document). The OS/2 implementation
+of the CUPS framework is provided by the eCUPS package available at
+http://svn.netlabs.org/ecups/.
+
+The Qt Runtime detects the presence of eCUPS in the system on the fly and talks
+to the CUPS daemon directly, bypassing the standard OS/2 printing subsystem.
+This means that in order to print from Qt applications, you don't need to create
+and configure printer objects using the standard OS/2 system printer setup
+procedure -- you only need to install eCUPS and configure your printers in
+there. Please refer to the eCUPS user manual to obtain the detailed instructions
+on how to configure CUPS printers.
+
+
+
+FILE WATCHING FUNCTION
+
+Qt supports a mechanism of notifying Qt applications about changes to the file
+system, such as creating files or directories, changing their attributes or
+deleting them, even if these changes are performed outside Qt applications. In
+particular, this is used in standard Qt open file dialogs where you can
+instantly observe changes made to the directory contents by third-party
+applications running in the background.
+
+In order to support this functionality on OS/2, Qt relies on the file watching
+mechanism provided by the Presentation Manager. This mechanism is a global
+system resource so that only one process may use it at a time. In a standard
+installation of OS/2 or eComStation this resource is exclusively used by the
+Workplace Shell and is not available to other applications. In order to overcome
+this limitation, a respective function was included to xWorkplace, the famous
+WPS extension (which lives inside the WPS process), starting with version 1.0.8.
+This function allows any number of other processes to receive notifications
+about file system changes and it gets utilized by Qt as well.
+
+If an earlier version of xWorkplace is installed on the user system, or if no
+xWorkplace extension is present at all, Qt uses its own method of detecting
+file system changes which is based on polling the directory contents in regular
+intervals. While this method works well for a small number of watched
+directories with just few files in them, it may significantly slow down the
+system if you work with a directory containing thousands of files.
+
+Therefore, is strongly recommended to install or upgrade to xWorkplace version
+1.0.8 or above to make sure that you will not suffer from the described problem.
+You will also need to make sure that the "Enable folder auto-refresh" check box
+located on the "Folder Views" page in the Workplace Shell settings notebook is
+turned on in order to enable the notification mechanism (note that you may need
+to reboot after changing its state).
+
+
+
+ENVIRONMENT VARIABLES
+
+The Qt library recognizes a number of OS/2-specific environment variables that
+affect its functionality at runtime. The table below lists these variables and
+their meaning:
+
+  QT_PM_NO_DIVE             If set, Qt will not use DIVE (direct interface video
+                            extensions) for painting widgets even if DIVE (which
+                            provides a much faster painting speed than the
+                            regular GPI approach) is available. Currently, this
+                            is the default setting if the Panorama video driver
+                            is detected because its DIVE implementation contains
+                            a number of bugs.
+
+  QT_PM_DIVE=<mode>         Enables using DIVE for painting widgets. <mode> is
+                            one of:
+
+                              - FB (direct framebuffer access, which is the
+                                fastest mode but causes the curruption of the
+                                screen under the software mouse pointer due to
+                                the limitation of DIVE). If this mode is not
+                                available, BLIT will be used (see below).
+
+                              - FBSWM (the same FB but hides the mouse pointer
+                                before painting which introduces mouse flicker
+                                and may be a bit slower than the raw FB).
+
+                              - BLIT (slower than both FB and FBSWM but prevents
+                                screen corruption under the mouse pointer and
+                                does not produce the mouse pointer flicker
+                                effect).
+
+                            This variable is ignored if QT_PM_NO_DIVE is set. If
+                            neither this nor the QT_PM_NO_DIVE variable is set,
+                            the FBSWM mode is used by default (unless the
+                            current video driver is Panorama, see above).
+
+  QT_PM_NO_SOUND_SHARE      If set, Qt will open the audio device in exclusive
+                            only one sound may be played on the computer at a
+                            time. This mode is necessary for some sound cards
+                            when using the Uniaud audio driver as it is known to
+                            have problems with simultaneous playback.
+                            Qt builds,
+
+  QT_PM_SOUND_SHARE         The opposite to the above. If set, Qt will open the
+                            audio device in shared mode. This is the default
+                            behavior if neither this nor the
+                            QT_PM_NO_SOUND_SHARE variable is set. This variable
+                            is ignored if QT_PM_NO_SOUND_SHARE is set.
+
+  QT_PM_NO_REGISTRY         If set, Qt will not use the Open32 registry to store
+                            application settings with QSettings. Instead, plain
+                            text INI files will be used for both NativeFormat
+                            and IniFormat. Due to a number of problems in the
+                            Open32 registry implementation (that may easily lead
+                            to registry corruption), this is the default
+                            behavior if neither this nor the QT_PM_REGISTRY
+                            variable is set.
+
+  QT_PM_REGISTRY            The opposite to the above. If set, Qt will use the
+                            Open32 registry to store application settings. This
+                            variable is ignored if QT_PM_NO_REGISTRY is set.
+
+  QT_PM_NO_SYSTEM_LOCALE    If set, Qt will ignore the regional settings from
+                            the system locale object found in the Country
+                            Palette located in the System Setup folder and will
+                            take them from the internal Qt locale database
+                            according to the current country and language
+                            settings. Due to the fact that this internal Qt
+                            database usually has a better representation of the
+                            regional settings, this is the default behavior if
+                            neither this nor the QT_PM_SYSTEM_LOCALE variable is
+                            set.
+
+  QT_PM_SYSTEM_LOCALE       The opposite to the above. If set, Qt will use the
+                            regional settings as found in the default locale
+                            object set the Country Palette.  This variable is
+                            ignored if QT_PM_NO_SYSTEM_LOCALE is set.
+
+  LANG                      This variable can be used to override the default
+                            country and language used in the Qt application both
+                            for regional settings and for translations. The
+                            format of the value is "ll_CC" where <ll> is the
+                            two-letter ISO language code and <CC> is the two-
+                            letter ISO country code. Note that if this variable
+                            is not set, Qt will derive the language and country
+                            from the system country code specified in the
+                            COUNTRY statement of CONFIG.SYS.
+
+
+
+COMMAND LINE OPTIONS
+
+Any Qt executable recognizes a number of command line options that may change
+the behavior of the Qt application. Here are the most interesting ones:
+
+  -style <name>             Changes the default Qt widget style (theme) to a
+                            style with the given name. The buiil-in styles which
+                            are always available in the official build include:
+                            "windows" (currently, the default on OS/2), "motif",
+                            "cde", "plastique" and "cleanlooks". Other styles
+                            may be also provided by the style plugins.
+
+  -graphicssystem <name>    Changes the graphics system used to paint widgets.
+                            On OS/2, only two values are supported: "native"
+                            (the default one) and "raster". The "native" system
+                            uses DIVE (direct interface video extensions) when
+                            it is available. If DIVE is not available or if it
+                            is disabled (see the QT_PM_NO_DIVE environment
+                            variable description for details), the "raster"
+                            system will be automatically selected as a fallback.
+
+
+
+CURRENT LIMITATIONS
+
+  1. configure.cmd does not understand all command line options understood by
+     configure scripts on other platforms. If you want to customize your build
+     of the Qt library (which is normally not recommended and not supported),
+     you may try to modify configure.cmd itself.
+
+  2. OS/2 bitmap fonts are not supported. Use TTF or Type1 (PFB) fonts with Qt.
+
+  3. No support for widget masks and trapsparency in top-level widgets and in
+     child widgets with native window IDs (Presentation Manager limitation).
+
+  4. No native PM style, but Qt will use fonts and colors from the current
+     OS/2 theme. Hint: if your default OS/2 font is "WarpSans", install the
+     "Workplace Sans" TTF font from Alex Taylor to get more native look & feel.
+     It is recommended to install version 0.7 of the Normal face and version 0.3
+     of the Bold face which you can find here:
+
+       http://users.socis.ca/~ataylo00/creative/fonts/workplace/
+
+  5. QProcess: when starting PM applications from text-mode applications, the
+     returned PID is a PID of the intermediate cmd.exe process, not the target
+     application.
+
+  6. The following classes are not available due to their rare usage or low
+     importance on the OS/2 platform: QSharedMemory, QSystemSemaphore,
+     QInputContext. On the source level, a number of macros is defined to
+     reflect this, respectively: QT_NO_SYSTEMSEMAPHORE, QT_NO_SHAREDMEMORY,
+     QT_NO_IM. Normally, Qt applications use these macros in the form of
+     "#fndef QT_NO_SOMEFEATURE" to isolate the relevant parts of the code that
+     uses these classes so that the application still builds when the
+     corresponding feature is missing.
+
+  7. No qt3support module. This functionality is rarely necessary in mature
+     real life Qt applications and has low priority. In the code, it is
+     reflected by the absense of the QT3_SUPPORT macro.
+
+  8. The following features are missing (either because of the lack of the
+     required support from the system side or because of the rare usage):
+
+     - IPV6 support in the network module (QT_NO_IPV6 is defined).
+     - phonon module (QT_NO_PHONON is defined).
+     - multimedia module (QT_NO_MULTIMEDIA is defined).
+     - OpenGL module (QT_NO_OPENGL is defined).
+     - tablet support (QT_NO_TABLET is defined).
+
+  See the project roadmap for more information on the current progress and
+  future plans:
+
+    http://svn.netlabs.org/qt4/roadmap
+
+  Feel free to request new features and report bugs using the project bug
+  tracker abaialble at:
+
+    http://svn.netlabs.org/qt4/report
+
+
+
+CREDITS
+
+Dmitriy Kuminov (development)
+Silvan Scherrer (management)
+
+netlabs.org (hosting & support)
+
+Nokia Corporation (original Qt library)
+
+We also want to THANK all individuals and organizations who made the donations
+to this project and helped to make it happen. Please visit
+
+  http://qt.netlabs.org/en/site/index.xml
+
+to get the full list of sponsors and to find information on how you can support
+the project.
+
+
+Qt is a trademark of Nokia Corporation and/or its subsidiary(-ies).
+OS/2 and OS/2 Warp are trademarks of the IBM Corporation and/or its subsidiary(-ies).
+eComStation is a trademark of Serenity Systems International and/or its subsidiary(-ies).
+Etc.
