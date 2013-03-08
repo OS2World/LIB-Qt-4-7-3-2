@@ -247,9 +247,9 @@ static BOOL EXPENTRY InputHook(HAB hab, PQMSG pQmsg, ULONG fs)
     return FALSE;
 }
 
-BOOL xstQuerySysTrayVersion(PULONG pulMajor,
-                            PULONG pulMinor,
-                            PULONG pulRevision)
+XSTAPI(BOOL, xstQuerySysTrayVersion)(PULONG pulMajor,
+                                     PULONG pulMinor,
+                                     PULONG pulRevision)
 {
     BOOL brc;
     PSYSTRAYCTLDATA pData = AllocSysTrayCtlDataPtr();
@@ -275,12 +275,12 @@ BOOL xstQuerySysTrayVersion(PULONG pulMajor,
     return brc;
 }
 
-BOOL xstAddSysTrayIcon(HWND hwnd,
-                       USHORT usId,
-                       HPOINTER hIcon,
-                       PCSZ pcszToolTip,
-                       ULONG ulMsgId,
-                       ULONG ulFlags)
+XSTAPI(BOOL, xstAddSysTrayIcon)(HWND hwnd,
+                                USHORT usId,
+                                HPOINTER hIcon,
+                                PCSZ pcszToolTip,
+                                ULONG ulMsgId,
+                                ULONG ulFlags)
 {
     BOOL    brc;
     ULONG   xrc = XST_FAIL;
@@ -396,9 +396,9 @@ BOOL xstAddSysTrayIcon(HWND hwnd,
     return brc;
 }
 
-BOOL xstReplaceSysTrayIcon(HWND hwnd,
-                           USHORT usId,
-                           HPOINTER hIcon)
+XSTAPI(BOOL, xstReplaceSysTrayIcon)(HWND hwnd,
+                                    USHORT usId,
+                                    HPOINTER hIcon)
 {
     BOOL    brc;
     PPIB    ppib;
@@ -432,8 +432,8 @@ BOOL xstReplaceSysTrayIcon(HWND hwnd,
     return brc;
 }
 
-BOOL xstRemoveSysTrayIcon(HWND hwnd,
-                          USHORT usId)
+XSTAPI(BOOL, xstRemoveSysTrayIcon)(HWND hwnd,
+                                   USHORT usId)
 {
     BOOL brc;
     HAB     hab;
@@ -480,9 +480,9 @@ BOOL xstRemoveSysTrayIcon(HWND hwnd,
     return brc;
 }
 
-BOOL xstSetSysTrayIconToolTip(HWND hwnd,
-                              USHORT usId,
-                              PCSZ pcszToolTip)
+XSTAPI(BOOL, xstSetSysTrayIconToolTip)(HWND hwnd,
+                                       USHORT usId,
+                                       PCSZ pcszToolTip)
 {
     BOOL brc;
     PSYSTRAYCTLDATA pData = AllocSysTrayCtlDataPtr();
@@ -510,20 +510,20 @@ BOOL xstSetSysTrayIconToolTip(HWND hwnd,
     return brc;
 }
 
-BOOL xstShowSysTrayIconBalloon(HWND hwnd, USHORT usId, PCSZ pcszTitle,
-                               PCSZ pcszText, ULONG ulFlags, ULONG ulTimeout)
+XSTAPI(BOOL, xstShowSysTrayIconBalloon)(HWND hwnd, USHORT usId, PCSZ pcszTitle,
+                                        PCSZ pcszText, ULONG ulFlags, ULONG ulTimeout)
 {
     // @todo implement
     return FALSE;
 }
 
-BOOL xstHideSysTrayIconBalloon(HWND hwnd, USHORT usId)
+XSTAPI(BOOL, xstHideSysTrayIconBalloon)(HWND hwnd, USHORT usId)
 {
     // @todo implement
     return FALSE;
 }
 
-BOOL xstQuerySysTrayIconRect(HWND hwnd, USHORT usId, PRECTL prclRect)
+XSTAPI(BOOL, xstQuerySysTrayIconRect)(HWND hwnd, USHORT usId, PRECTL prclRect)
 {
     BOOL brc;
     PSYSTRAYCTLDATA pData = AllocSysTrayCtlDataPtr();
@@ -545,7 +545,7 @@ BOOL xstQuerySysTrayIconRect(HWND hwnd, USHORT usId, PRECTL prclRect)
     return brc;
 }
 
-ULONG xstGetSysTrayCreatedMsgId()
+XSTAPI(ULONG, xstGetSysTrayCreatedMsgId)()
 {
     if (WM_XST_CREATED == 0)
         WM_XST_CREATED = WinAddAtom(WinQuerySystemAtomTable(),
@@ -553,7 +553,7 @@ ULONG xstGetSysTrayCreatedMsgId()
     return WM_XST_CREATED;
 }
 
-ULONG xstGetSysTrayMaxTextLen()
+XSTAPI(ULONG, xstGetSysTrayMaxTextLen)()
 {
     return sizeof(((PSYSTRAYCTLDATA)0)->u.icon.szToolTip);
 }

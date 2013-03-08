@@ -860,8 +860,9 @@ BOOL WgtMouse(HWND hwnd, ULONG msg, MRESULT mp1, MRESULT mp2,
     PICONDATA   pIconData;
     PNOTIFYDATA pNotifyData;
 
-    ptl.x = ((PPOINTS)&mp1)->x;
-    ptl.y = ((PPOINTS)&mp1)->y;
+    PPOINTS ppts = (PPOINTS)&mp1;
+    ptl.x = ppts->x;
+    ptl.y = ppts->y;
 
     LOGF(("msg %x ptl %ld,%ld\n", msg, ptl.x, ptl.y));
 
