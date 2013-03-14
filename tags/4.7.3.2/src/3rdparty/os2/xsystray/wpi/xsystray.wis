@@ -1,0 +1,103 @@
+<WARPIN VERSION="0.9.20" OS="OS2_4x">
+
+<HEAD>
+
+<TITLE>Extended System Tray widget for XCenter 0.1.1 (28-03-2011)</TITLE>
+
+<REXX NAME="GetDLLPath">
+    rc = rxFuncAdd('SysLoadFuncs', 'REXXUTIL', 'SysLoadFuncs')
+    rc = SysLoadFuncs()
+    ret = SysBootDrive()'\OS2\DLL'
+    bestPath = SysBootDrive()'\ecs\dll'
+    config_sys = SysBootDrive()'\config.sys'
+    do while lines(config_sys)
+        line = linein(config_sys)
+        if (left(line, 8) == 'LIBPATH=') then do
+            /* locate the previous occurence of path */
+            libpath = translate(substr(line, 9))
+            path = translate(bestPath)
+            l = length(path)
+            found = 0; p = 1
+            do while (\found)
+                p = pos(path, libpath, p)
+                if (p == 0) then leave
+                cb = ''; ca = ''
+                /*<*/
+                if (p > 1) then cb = substr(libpath, p - 1, 1)
+                if (p + l <= length(libpath)) then ca = substr(libpath, p + l, 1)
+                /*>*/
+                found = (cb == '' | cb == ';') & (ca == '' | ca == ';')
+                if (\found) then p = p + 1
+            end
+            if (found) then do
+                ret = bestPath
+                leave
+            end
+        end
+    end
+    return ret
+</REXX>
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+<PCK INDEX=1
+     PACKAGEID="netlabs.org\Qt4\SysTray\100\1\1\843"
+     TITLE="Extended System Tray widget for XCenter"
+     NODESELECT
+     REQUIRES="Ulrich M”ller\XWorkplace\Kernel\0\9\9"
+     TARGET="$(Ulrich M”ller\XWorkplace\Kernel)\plugins\xcenter" FIXED
+     LONGFILENAMES
+>Provides support for the system tray to Qt, OpenJDK and other applications. This package is required</PCK>
+
+<PCK INDEX=2
+     PACKAGEID="netlabs.org\Qt4\SysTrayDLL\100\1\1\843"
+     TITLE="Extended System Tray DLL"
+     NODESELECT
+     REQUIRES="1"
+     TARGET="=("GetDLLPath")"
+     LONGFILENAMES
+>Provides easy-to-use API for the Extended System Tray. This package is required</PCK>
+
+<PCK INDEX=3
+     PACKAGEID="netlabs.org\Qt4\SysTrayAPI\100\1\1\843"
+     TITLE="Extended System Tray API libraries"
+     TARGET="?:\Coding\xsystray"
+     LONGFILENAMES
+>Provides import API libraries for adding Extended System Tray support to other applications</PCK>
+
+</HEAD>
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+<BODY>
+
+<PAGE INDEX=1 TYPE=README>
+<TEXT>Welcome to the Extended System Tray widget Installation Program!
+
+Please read through the following pages by pressing "Next" to continue or press "Cancel" to abort the installation.</TEXT>
+
+<README FORMAT=FLOW EXTRACTFROMPCK="3">README</README>
+</PAGE>
+
+
+<PAGE INDEX=2 TYPE=README>
+<TEXT>Please read the License information. By pressing the "I agree" button, you agree to all terms and conditions to the below license agreement.</TEXT>
+
+<README FORMAT=FLOW EXTRACTFROMPCK="3">COPYING</README>
+</PAGE>
+
+<PAGE INDEX=3 TYPE=CONTAINER>
+<TEXT>Please select the packages which are to be installed.
+
+Note that some package installation paths use the system directories and cannot be changed.</TEXT>
+</PAGE>
+
+<PAGE INDEX=4 TYPE=TEXT>
+<NEXTBUTTON TARGET=0>I~nstall</NEXTBUTTON>
+<TEXT>Press "Install" to begin installing the Extended System Tray widget.</TEXT>
+</PAGE>
+
+
+</BODY>
+</WARPIN>
+
