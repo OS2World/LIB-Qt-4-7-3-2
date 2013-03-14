@@ -61,6 +61,12 @@
 
 #include <stdlib.h>
 
+#ifdef Q_OS_OS2
+#ifdef __INNOTEK_LIBC__
+#include <InnoTekLIBC/pathrewrite.h>
+#endif
+#endif
+
 QT_BEGIN_NAMESPACE
 
 static QString driveSpec(const QString &path)
@@ -714,6 +720,14 @@ QString QDir::absoluteFilePath(const QString &fileName) const
     bool curDriveRelative = false;
     bool curDirOnDriveRelative = false;
     if (isAbsolutePath(fn)) {
+#ifdef __INNOTEK_LIBC__
+        // Make sure we perform any path rewrite before testing for real
+        // absoluteness. This is necessary to avoid resolving paths like
+        // /@unixroot/dir to X:/@unixroot/dir which would be wrong.
+        char buf[PATH_MAX+1];
+        if (__libc_PathRewrite(QFile::encodeName(fn).constData(), buf, sizeof(buf)) > 0)
+            fn = QFile::decodeName(buf);
+#endif
         // filter out not really absolute cases
         QChar ch0, ch1, ch2;
         if (fn.length()) ch0 = fn.at(0);
@@ -736,6 +750,7 @@ QString QDir::absoluteFilePath(const QString &fileName) const
             // QFileInfo::absoluteFilePath() knows what to do
             ret = QFileInfo(fn).absoluteFilePath();
         } else {
+            // we can't rely on the engine's AbsoluteName here, see the big comment above
             if (curDriveRelative)
                 ret = ret.left(2); // only take the drive name from this QDir
             else if (!ret.isEmpty() && !ret.endsWith(QLatin1Char('/')))
