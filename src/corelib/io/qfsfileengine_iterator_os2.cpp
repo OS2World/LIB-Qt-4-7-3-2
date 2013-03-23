@@ -271,10 +271,16 @@ bool QFSFileEngineIterator::hasNext() const
 #else // !QT_OS2_USE_DOSFINDFIRST
         } else {
             // DosFindFirst is unaware of symlinks; help it with canonicalFilePath()
-            QString mask = QFileInfo(path).canonicalFilePath().append(QLatin1String("/*"));
-            mask = QDir::toNativeSeparators(QDir::cleanPath(mask));
+            QString realPath = QFileInfo(path).canonicalFilePath();
+            if (!realPath.isEmpty()) {
+                realPath = QDir::toNativeSeparators(realPath);
+                if (!realPath.endsWith(QLatin1Char('\\')))
+                    realPath.append(QLatin1Char('\\'));
+                realPath.append(QLatin1Char('*'));
+            }
             ULONG count = 1;
-            if (DosFindFirst(QFile::encodeName(mask).constData(),
+            if (realPath.isEmpty() ||
+                DosFindFirst(QFile::encodeName(realPath).constData(),
                              &that->platform->hdir,
                              FILE_NORMAL | FILE_READONLY | FILE_HIDDEN |
                              FILE_SYSTEM | FILE_DIRECTORY | FILE_ARCHIVED,
