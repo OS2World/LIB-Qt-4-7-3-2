@@ -1,0 +1,10 @@
+isEmpty(QMAKE_EXEPACK):error("'exepack' is present in CONFIG but QMAKE_EXEPACK is not defined!")
+
+contains(TEMPLATE, ".*lib"):dll|contains(TEMPLATE, ".*app") { 
+    build_pass|isEmpty(BUILDS) {
+        CONFIG(release, debug|release) {
+            !isEmpty(QMAKE_POST_LINK):QMAKE_POST_LINK = $$QMAKE_POST_LINK$$escape_expand(\\n\\t)
+            QMAKE_POST_LINK = $$QMAKE_POST_LINK$$QMAKE_EXEPACK $$QMAKE_EXEPACK_FLAGS $@ $$QMAKE_EXEPACK_POST_FLAGS
+        }
+    }
+}

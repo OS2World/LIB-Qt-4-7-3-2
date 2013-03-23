@@ -1,0 +1,855 @@
+This document contains a brief list of the most important OS/2-specific changes
+in the Qt library from release to release.
+
+
+CHANGES
+
+
+4.7.3 GA2 (22-03-2013)
+
+  Improvements:
+
+  - general: Understand both WLINK and wlink in the EMXOMFLD_TYPE environment
+    variable.
+
+  - corelib: Make qFatal() call LIBC abort() instead of exit(1) (useful for
+    debugging since abort() may be asked to generate breakpoint exceptions).
+
+  - corelib: Add support for eCS version 2.1 and 2.2 to QSysInfo.
+
+  - corelib: Add support of the path rewrite feature of kLIBC to the OS/2 file
+    engine (QFile, QDir, QFileInfo and related classes).
+
+  - corelib: Add proper support of kLIBC-style symlinks to QDir, QDirIterator and
+    QFileInfo (according to the respective documentation).
+
+  - network: Use system locations to search for OpenSSL certificate files (which
+    are necessary to make things like HTTPS work properly).
+
+  - gui: Add support of kLIBC-style symlink sto QFileDialog and friends.
+
+  Fixes:
+
+  - general: Fix Qt application build breaks with "undefined variable" error in
+    runmapsym.cmd.
+
+  - corelib: Make sure QLibrary::load() doesn't change the FPU control word. This
+    fixes SIGFPU in some Qt applications.
+
+  - gui: Fix QWidget::setWindowsIcon() which would work only once per session.
+
+
+4.7.3 (15-09-2011)
+
+  Improvements:
+
+  - general: Updated Qt codebase to version 4.7.3 (see the changes-4.7.3 file
+    for details). This version should be binary compatible with the previous
+    version of Qt for OS/2.
+
+  - general: Enable building the QtDeclarative and QtWebKit libraries by
+    default.
+
+  - corelib: QProcess: Implemented new I/O pipe notification mechanism that
+    fixes a number of issues such as hangs and truncated data during inter-
+    process communication using redirection of standard I/O channels.
+
+  - corelib: Make the native QFileSystemWatcher engine a singleton to reduce
+    the number of clients connecting to the server (part of XWP) that has a
+    limit on the number of connections.
+
+  - corelib: Make the native QFileSystemWatcher recognize file changes (i.e.
+    changes in file date/time/size) using a special poller thread. The original
+    OS/2 file notification mechanism (used by XWP) does not report such changes.
+
+  - corelib: QDir: Filter out "." and ".." from root directory listings to be
+    consistent across different IFSes and to match Windows behavior.
+
+  - gui: QSound: Use shared mode by default.
+
+  - gui: Include higher res pixmaps in icons returned by
+    QCommonStyle::standardIcon().
+
+  - gui: Make QFileSystemModel put "." and ".." entries first.
+
+  - gui: Take style icons for SP_FileIcon & SP_DirIcon from QFileIconProvider
+    by default.
+
+  - gui: Disable native window masking code as it is not complete (doesn't
+    work properly in DIVE mode).
+
+  - gui: Add support for short DLL names of QML plugins.
+
+  - gui: Enable linking to cups.dll at runtime (requires CUPS 1.4.8 and above).
+
+  - xsystray: Paint an empty box for NULL icons instead of leaving the old icon
+    if it was not NULL.
+
+  - xsystray: Fixed duplicate mouse click notifications.
+
+  - qmake: Make the shadow build mode work (both for Qt itself and for other
+    qmake-based applications).
+
+  - qmake: Do not shorten library names for DLLs when TARGET_SHORT is used.
+    This allows to use the same library name on all platforms.
+
+  - qmake: Added support for .SYM file generation on OS/2 (controlled by the
+    'sym' CONFIG option, which is present in release builds by default).
+
+  - qmake: Added replace functions 'fixpath_target' and 'fixpath_local'.
+
+  - qmake: Always add project directory to INCLUDEPATH. This makes individual
+    per-project 'INCLUDEPATH += .' statements unnecessary.
+
+  - qmake: Support FAST_BUILD make macro in generated Makefiles to disable slow
+    noncritical steps like .sym file generation.
+
+  - qmake: Recognize QMAKE_TARGET_VERSION in .pro which allows to embed the
+    version to EXE/DLL like VERSION but w/o appending the major version suffix
+    to the DLL name.
+
+  - qmake: Let INSTALL_ROOT override the dirve letter too to be able to redirect
+    make install to another drive.
+
+  - configure.cmd: Support build type options (-release, -debug,
+    -debug-and-release, -developer-build, -make and -nomake). Run with --help
+    or details.
+
+  - configure.cmd: Enable building examples by default.
+
+  Fixes:
+
+  - corelib: QProcess: Don't close the stdin pipe until the child reads it all.
+
+  - corelib: QProcess: Use dup()/dup2() instead of DosDupHandle() to make sure
+    the child process sees the correct state of stdin/out/err (e.g. isatty()).
+
+  - corelib: QProcess: Fixed the way how pipes are closed to makes sure that
+    feof() will return 1 and ferror() will not return 1 on the child end of the
+    pipe connected to its stdin. This fixes programs relying on these functions.
+
+  - corelib: QProcess: Fix possible hangs when using syncronous wait functions
+    in a GUI program.
+
+  - corelib: Fixed spontaneous failures to create native QFileSystemWatcher
+    objects.
+
+  - corelib: Don't eat drive letters in QDir::cleanPath() for paths like
+    "D:/../../mydir" (which would become "mydir").
+
+  - gui: Make sure that modal widgets never go behind the blocked widgets.
+
+  - gui: Make blocked widgets always follow the modal widget on Z-order change.
+    This makes sure that bringing the modal widget to front also raises all
+    widgets it blocks (keeping them right under it in the same Z-order).
+
+  - gui: Fixed the assertion in QPixmap::setMask() that could also lead to
+    creating pixmaps w/o masks.
+
+  - gui: Fixed creating HPOINTERs from QPixmaps with no mask. This fixes
+    setting PNG files with no mask as top-level window icnos.
+
+  - gui: Do not attempt to natively hide widgets with no handle and fix
+    hiding reparented child widgets with native handles.
+
+  - gui: Create native IDs (HWNDs) for all siblings and children of the widget
+    when its native ID is requested. This is for proper clipping and to be
+    compatible with other platforms.
+
+  - gui: Don't destroy widget's HWND on reparent until children are reparented,
+    otherwise all children with native HWNDs will be deleted.
+
+  - gui: Fix position errors on resize of child widgets during complex geometry
+    changes (e.g. manually changing the geometry of a layout-managed widget).
+
+  - gui: Fix Qt Assistant remote control which would only process
+    '\0'-terminated commands.
+
+  - gui: Fix signal recursion at Assistant startup in remote control mode that
+    could cause 100% CPU load.
+
+  - qmake: Fixed a hang when compiling .RC files with too long include paths.
+
+  - qmake: Don't call lxlite on phony targets.
+
+  - qmake: Make sure string quotes in DEFINES statements are processed
+    correctly (similar to other platforms).
+
+  - qmake: Several small fixes to path quoting and slashes that could cause
+    various build and install problems under certain conditions.
+
+  - uic: Fixed doubling EOLs (CRs) in pipe mode.
+
+
+4.6.3 (19-11-2010)
+
+  Improvements:
+
+  - general: Updated Qt codebase to version 4.6.3 (see the changes-4.6.3 file
+    for details). This version should be binary compatible with the previous
+    version of Qt for OS/2.
+
+  - general: qmake uses .NOTPARALLEL for some targets to support parallel
+    building of complex applications with the -jN GNU make option.
+
+  - corelib: Significantly improve the performance of directory iterators
+    walking through directories with thousands of files on slow file systems
+    with inefficient cache policies [based on patch by rudi].
+
+  - corelib: Don't report non-existent floppy drives in QDir::drives(). This
+    makes letter A: and B: disappear from standard file dialogs in case if the
+    computer doesn't have the floppy controller at all or it is disabled in BIOS
+    [patch by rudi].
+
+  - corelib: Implemented QSysInfo::os2Version(). Fixes the UserAgent string
+    in QWebKit-based browsers.
+
+  - corelib: Fixed: Hang when attempting to stop the file watcher thread after
+    reusing it for more than one directory (e.g. like in the standard file
+    dialog).
+
+  - network: Added OpenSSL support. This enables visiting web sites using the
+    secure HTTPS protocol in Qt based web-browser applications.
+
+  - network: Improved network disk cache performance by reducing the number of
+    stat() calls twice when expiring the cache items [based on patch by rudi].
+
+  - network: More verbose error messages from QLocalServer/QLocalSocket instead
+    of just "Unknown error".
+
+  - network: QNetworkInterface::hardwareAddress() returns a real MAC and
+    netmask() returns a correct value.
+
+  - plugins: Enabled the MySQL and PostgresSQL Qt plugins. Note that these
+    plugins require MySQL and PostgresSQL DLLs to be installed.
+
+  - gui: DIVE: Detection code of the Panorama video driver now detects the
+    driver presence in memory rather than what will be loaded on next reboot.
+    This also solves redraw problems in cases where Panorama is installed
+    together with some other video extension -- the old method could not
+    detect Panorama and would enable DIVE leading to screen corruption.
+
+  - gui: Send PDF data to a CUPS printer on by default if CUPS is version 1.4.4
+    or above (where printing PDF data was fixed).
+
+  - gui: QCommonStyle::standardIconImplementation(): Generate the stanrad small
+    and/or large icon size if it is missing from the stock icon to avoid icon
+    size differences in e.g. file dialogs.
+
+  - webkit: Try to allocate memory blocks in high memory on OS/2 first and fall
+    back to low memory on failure.
+
+  Fixes:
+
+  - general: Fixed: configure.cmd would not work in Object REXX bmode.
+
+  - corelib: Fixed a deadlock during alien thread termination (copy-paste bug)
+    [found by komh].
+
+  - corelib: Fixed: QProcess::startDetached() would fail with a certain set of
+    arguments [patch by rudi].
+
+  - network: Fixed: QLocalServer/QLocalSocket: Make sure the socket path name
+    always starts with "\socket\". This fixes applications that use local
+    sockets for single application instance detection [based on patch by rudi].
+
+  - network: Fixed: Filter out garbage entries returned by ioctl(SIOCGIFCONF) on
+    OS/2 so they don't appear in the QNetworkInteface::allInterfaces() list.
+
+  - network: Fixed: QLocalServer could hang forever in the destructor trying to
+    close the listen socket being watched by a socket notifier. This fixes the
+    Assistant application hang at startup.
+
+  - gui: Fixed: Doing Drag-n-Drop over a Qt target in DIVE mode would corrupt
+    the window contents.
+
+  - gui: Fixed: Children with real HWNDs (a.k.a native widgets) were painted
+    over by the parent widget causing annoying flicker (smplayer).
+
+  - gui: Fixed: In Dive mode, the screen would get corrupted if the application
+    created a child window with a real HWND (as e.g. smplayer does).
+
+  - gui: Fixed: Qt Assistant would corrupt screen at startup in DIVE FB mode
+    [based on patch by rudi].
+
+  - gui: Fixed: DIVE mode was unreasonably disabled in 24-bit color depth
+    display modes.
+
+  - gui: Fixed: Path separator was missing in the output file name when printing
+    to a PDF or PS file in the print dialog.
+
+  - gui: Fixed QFileDialog: Item height in the side bar was increased by
+    increasing icon size which caused ugly icon scaling. Now the item size hint
+    is used instead (based on the normal item height) [vendor bug].
+
+  - gui: Fixed: Possible crash and an endless PM event loop recursion when
+    re-parenting widgets in DIVE mode. This could be seen when dragging a
+    toolbar out of the dock widget, dragging it back then closing the
+    application (crash) or attempting to drag the toolbar out again (endless
+    recursion).
+
+  - gui: Fixed: Assertion shown when dragging the "Computer" item in the side
+    bar of the file dialog.
+
+  - gui: Fixed: QCups would try to unlink() a NULL path which crashed some
+    libc implementations [vendor bug].
+
+  - gui: Workaround: Set O_BINARY for temporary file descriptors we get from
+    CUPS when printing using the PDF engine to avoid file contents corruption.
+
+  - gui: Fixed: Starting the drag operation would take the Qt focus away and
+    close all popups which is unexpected.
+
+  - gui: Fixed: Repainting the widget during Drag-n-Drop outside the
+    drag*Event() callbacks would cause screen corruption under the mouse pointer
+    in DIVE mode.
+
+  - gui: Fixed: Pressing Shift[+Ctrl]]+<numpad_digit> generated digits in
+    NumLock ON mode instead of cursor movement events (which is necessary to
+    make it possible to select text using numpad keys with Shift pressed.
+
+  - gui: Fixed: Hiding the main application window programmatically with
+    QWidget::hide() and then showing it again with QWidget::show() would not
+    activate it from the Qt point of view which prevented the child widgets from
+    getting the keyboard focus (and input).
+
+  - gui: Fixed a crash that could happen at program termination in DIVE mode if
+    a top-level window had a native HWND window embedded in it.
+
+  - gui: Fixed SIGSEGV on SSE2 processors due to misaligned m128i variables
+    on stack (an OS/2-specific GCC 4.x compiler bug).
+
+  - webkit: Fixed: Symbols typed with AltGr as a shift modifier could not be
+    entered in line entry fields in WebKit-based applications.
+
+  - webkit: Fixed: posix_memalign() broken in kLIBC 0.6.3/4 whould crash in
+    QWebKit under heavy memory consumption conditions.
+
+
+4.6.2 (14-05-2010)
+
+  Improvements:
+
+  - general: Updated Qt codebase to version 4.6.2 (see the changes-4.6.2 file
+    for details). Note that this version is binary incompatible with the
+    previous version (see README.OS2 for more information).
+
+  - general: Implemented support for the OS/2 platform in the webkit module. The
+    webkit module is used in many complex web-based applications such as web
+    browsers to implement the JavaScript support. Note that the script module
+    uses the JavaScript implementation from the WebKit project too and it was
+    also ported to OS/2. The webkit module is always present in the official Qt
+    build but is disabled by defautl in the custom builds due to big compilation
+    times.
+
+  - general: Use declspec(dllexport) on OS/2 to significantly reduce the number
+    of exports in generated DLLs. This mode is on by default which reduces the
+    number of exported symbols by 90-100% in Qt DLLs and makes it not necessary
+    to split the QtGui DLL in 3 parts in debug mode. The old method which causes
+    all public symbols to be exported is still available using the "export_all"
+    CONFIG option (see README.OS2 for details).
+
+  - general: Provide the "doc" WPI archive that contains the Qt reference
+    documentation.
+
+  - corelib: Implemented native (XWP-based) file system watcher for OS/2 that
+    does not eat CPU (which is best noticed in file dialogs showing directories
+    containing hundreds of files. Requires XWorkplace to be installed.
+
+  - corelib: Implemented deriving the defaut locale from the process country
+    code if LANG is not set and integration with the system locale object
+    (System Setup -> Country Palette). See the QT_PM_NO_SYSTEM_LOCALE
+    description in README.OS2 for details.
+
+  - gui: Implemented printing support through CUPS. Refer to section "PRINTING
+    SUPPORT" in README.OS2 for details.
+
+  - gui: Implemented painting in widgets using DIVE (direct interface video
+    extensions). Using DIVE gives a significant graphical performance boost, up
+    to 100% in BLIT mode and 130% in FBSWM mode, depending on the combination of
+    the graphics hardware, video driver and the current screen mode. See the
+    QT_PM_DIVE and QT_PM_NO_DIVE description in README.OS2 for more details.
+
+  - gui: Improved the painting speed when not using DIVE. The performance boost
+    varies from 30% to 200% (e.g. 3 times faster), depending on the combination
+    of the graphics hardware, video driver and the current screen mode.
+
+  - gui: Enabled MMX/SSE support (on by default) to speed up graphical
+    operations by a couple of percents.
+
+  - gui: Enabled accessibility support on OS/2. Note that in order to use the
+    accessibility functions, a QAccessibleBridge plugin for the corresponding
+    accessibility device is necessary but none of them exist at the present
+    time.
+
+  - gui: Use native file icons in standard Qt file dialogs.
+
+  - assistant: Enabled the help module and made the Qt Assistant tool build on
+    OS/2. Also enabled help and assistant examples and demos.
+
+  - demos: Enabled the browser demo application that makes use of the webkit
+    module.
+
+  - demos: Enabled the qtdemo example that demonstrates all Qt features and
+    acts as a launcher for other example and demo applications.
+
+  - gnumake/os2-g++: Switch the compiler to using the i486 instruciton set for
+    code generation. This gives around 3% of the performance boost when
+    painting. As a drawback, the code will no longer run on i386 PCs but it is
+    assumed that it does not make sense to use Qt4 on these computers.
+
+  Fixes:
+
+  - general: Fixed: Building Qt applications with the "dev" WPI archive would
+    fail due to extra spaces in the output object file names.
+
+  - corelib: Fixed: Regular files were treated as sequential streams which made
+    the seek functionality unavailable. This in particular affected Qt Designer
+    that didn't expect sequential streams when reading .ui files and refused to
+    load files bigger than 8192 bytes as a result.
+
+  - corelib: Make sure the hardware error popup dialogs do not appear when
+    opening the standard Qt file dialog and selecting a removable drive with no
+    media inserted even with AUTOFAIL=YES in CONFIG.SYS
+
+  - corelib: QProcess: Fixed: Data could not be successfully read or written to
+    the standard streams of the started process in 'highmem' link mode (which is
+    on by default since 4.5.1 GA), as well as in normal link mode in some
+    situations.
+
+  - corelib: Fixed QProcess::startDetached() which would not work in 'highmem'
+    mode.
+
+  - corelib: QProcess: Fixed: Having stderr of a started child process
+    redirected to a pipe (which is the default) would indirectly cause an
+    impossibility to write anything to its stdin.
+
+  - corelib: QProcess: Get rid of the unexpected "DosQueryNPipeSemState returned
+    87" warning.
+
+  - corelib: QFileSystemWatcher: In the fall-back polling watcher, increased the
+    sleep time between checks of all watched files from 1 second to 3 seconds to
+    decrease the CPU load on big sets of watched files. Also, replaced the sleep
+    between checking individual items with the yield call as it doesn't give
+    significant improvement but just causes more CPU cycles to be spent between
+    each check.
+
+  - corelib: Always return true from QFileInfo::isRoot()/isDir() for paths
+    referring to root directories of drives with no media and always return
+    false from QFileInfo::exists() for them. Also, don't lstat() on such paths
+    since they are definitely not symlinks. This improves the file dialog
+    appearance and behavior for removable drives.
+
+  - corelib: Protect against the frozen system when QSocketNotifier is given an
+    unsupported socket (for example, an OS/2 file handle). There is still 100%
+    CPU load in this case, but the application can be at least closed using
+    normal means.
+
+  - corelib: Sockets: Fixed: "has data to read" socket notifications would be
+    sometimes delivered with a delay depending on the frequency of timers which
+    could significantly slow down network data transfer.
+
+  - corelib: QTemporaryFile: Fixed: Files were opened in O_TEXT mode which
+    caused unexpected LF <-> CRLF translation. In particular, this broke
+    QNetworkDiskCache functionality (seen in e.g. demos/browser as missing
+    images and CSS sheets when read from cache).
+
+  - corelib: Fixed: Clear FPU CW in qdtoa() to avoid the floating point
+    exception in various scenarios [patch by rudi].
+
+  - gui: Fixed assertion in QVector::at() at startup.
+
+  - gui: Fixed assertion at #1125 in qwidget.cpp (due to an attempt to
+    re-instantiate QDesktopWidget during application termination).
+
+  - gui: Select the correct icon for the drive letter in standard file dialogs
+    depending on the drive type (floppy, hard disk etc) [patch by rudi].
+
+  - gui: Fixed crash in PMMERGE during resize & move of the top level window
+    with the complex layout (caused by reading outside the bitmap data).
+
+  - gui: Fixed: Never add tooltip windows to the top-level window list and only
+    do so for splash windows if they have the Qt::WindowTitleHint flag set.
+
+  - 3rdparty: Added OS/2 support to clucene used by the help module for fulltext
+    search in help files [based on the patch by rudi].
+
+  - configure.cmd: Fixed: QT_BUILD_KEY (and QLibraryInfo::buildKey()) would
+    always contain "release", even in debug builds, which caused debug builds to
+    load the release plugins and refuse the debug ones.
+
+  - qmake/os2-g++: Use -Wl, to pass the object list response file to the
+    linker as is instead of the expanded list of objects (this overcomes the
+    64KB limitation of the total process command line length in OS/2).
+
+
+4.5.1 GA (05-02-2010)
+
+  Improvements:
+
+  - general: Switched the compiler to the GCC 4.4.2 build provided by Paul
+    Smeldey. This gives better standard conformance, better code optimization
+    and provides more compact DLLs and EXEs whose size is greater than ~1M.
+
+  - corelib: QSettings: Use IniFormat (plain INI files) when NativeFormat is
+    requested instead of the Open32 registry which is known to be unstable and
+    can be easily corrupted. The old behavior may be restored using the
+    QT_PM_REGISTRY environment variable.
+
+  - corelib: Use UniStrcoll for QString::localeAwareCompare() for locale-aware
+    comparison of NLS strings.
+
+  - gui: Implemented full Direct Manipulation (Drag And Drop) support. This
+    includes dragging text, URLs and files between PM and Qt applications,
+    dragging any MIME data across Qt applications, setting custom drag pointer
+    pixmaps, painting in widgets while dragging.
+
+  - gui: Implemented session management with the QSessionManager class.
+
+  - gui: Fully implemented the QDesktopServices class.
+
+  - gui: Added support for numpad keys and for some common multimedia keys
+    recognized by eCS (volume, home, search, favorites).
+
+  - gui: QCursor: Added missing cursor shapes and implemented support for custom
+    cursor shapes.
+
+  - gui: Implemented QFontDatabase::addApplicationFont()/removeApplicationFont()
+    and friends.
+
+  - gui: Implemented proper generation of possible key and modifier combinations
+    for a given key event. This in particular enables Ctrl+<letter> shortcuts
+    for non-Latin languages and also makes Ctrl+<letter>, Alt+<letter> and
+    similar shortcuts language-neutral.
+
+  - gui: QWidget: When setting the parent, take the parent's resolve masks to
+    make sure attributes imposed by the user on the parent won't be overriden
+    byv the natural palette for this widget if it differs from
+    QApplication::palette() [vendor bug].
+
+  - gui: Use a normal border for top-level Tool widgets since the thin one is
+    too thin and cannot be resized.
+
+  - gui: Implemented delivering of QEvent::NonClientAreaMouse* events to
+    top-level widgets. This enables undocked dock widgets to be docked back by
+    a double click on the title bar and also by moving over the dock areas.
+
+  - plugins: Enabled the sqlite3 plugin which makes the sql module (and
+    applications depending on it) actually usable.
+
+  - tools: Enabled the Qt Designer application.
+
+  - tools: Enabled the following toos: pixeltool, q3toq4, xmplatterns.
+
+  - qmake/os2-g++: Recognize the "map" option in the CONFIG variable that allows
+    to turn the generation of .map files on and off. The option is set by
+    default.
+
+  - qmake/os2-g++: Recognize the "highmem" option in the CONFIG variable that
+    allows to enabled memory support in LIBC for genereated DLLs and
+    executables. The option is set by default.
+
+  Fixes:
+
+  - corelib: Created wrappers for all Win* and Gpi* calls that restore the FPU
+    Control Word to what C/C++ programs expect. This fixes crashes in various
+    Qt applications (e.g. mp3diags) due to SIGFPE.
+
+  - corelib: QLibraryInfo: Fixed: qt.conf would not have been loaded if a
+    component path was requested before QCoreApplication instance creation.
+
+  - corelib: QLibraryInfo: Changed default "Settings" path to %ETC%/xdg.
+    Also use %ETC%/qtsys.conf as the system-wide qt.conf instead of
+    %ETC%/qt/qtsys.conf.
+
+  - corelib: QFSFileEngine: Fixed: On OS/2, trailing spaces in file names are
+    ignored ("readme " = "readme") but kLIBC doesn't handle this well so strip
+    them before passing to LIBC APIs.
+
+  - corelib: QFile::copy(): Use DosCopy() instead of read/write.
+
+  - corelib: Fixed: QProcess::startDetached() would either crash or fail to
+    start a process.
+
+  - corelib: Fixed: QFileInfo::isExecutable() would return true for all files on
+    local OS/2 file systems.
+
+  - gui: Fixed: Popups shown when another application is active were not
+    controllable with keyboard and didn't close on an outside mouse click.
+
+  - gui: Fixed: Visible title bar and frame of the top-level window after
+    switching to fullscreen.
+
+  - gui: Fixed: Wrong widget-relative mouse position in mouse events. This fixes
+    problems with dragging widget splitters (separators) in applications using
+    dock widgets.
+
+  - gui: Fixed: QEvent::Enter/Leave events were delivered incorrectly if the
+    alien child widget belonging to a native parent intersected with a native
+    child of this parent (this in particular caused extended tool bars to
+    immediately un-extend once the mouse moves over the extended part).
+
+  - gui: Fixed: Mouse press events replayed after closing the popup by clicking
+    outside it had incorrect coordinates. This resulted into various kinds of
+    misbehavior including spatial text selection in QTextEdit widgets after
+    closing popups by clicking inside these widgets.
+
+  - gui: Fixed: The default application icon embedded into the executable was
+    not actually used as the default window icon for top-level widgets.
+
+  - qmake/os2-g++: Do not use EXEPACK tool on static libraries.
+
+  - qmake: Several fixes to make install targets work correctly.
+
+
+Beta 5 (06-12-2009)
+
+  Improvements:
+
+  - gui: Added support for the system clipboard. Qt can now exchange plain text,
+    HTML (Mozilla application suite) and bitmaps with other PM applications, as
+    well as all supported MIME data types with other Qt-based applications.
+
+  - corelib: Use system unicode conversion routines to convert from the system
+    code page to Unicode and back. This makes it unnecessary to specify the
+    system encoding in the LANG environment variable -- Qt will use the system
+    encoding of the current process.
+
+  - gui: Implemented support for the IME input box (used on DBCS systems) in Qt
+    applications with a known limitation that the input box is always positioned
+    at the lower left corner of the top-level window.
+
+  - gui: Improved font handling on DBCS systems (patch by komh):
+    * Read national face names from font files instead of always taking the
+      Latin name.
+    * Use the PM_AssociateFont registry key to select a fallback font for
+      missing characters.
+
+  - gui: Implemented QPixmap::grabWindow() which takes a screenshot of a window.
+
+  - gui: Steal the Alt key from the PM which prevents the PM system menu to be
+    shown when single Alt is pressed in a Qt application. The system menu may
+    still be called using Alt+Space. Note that this also disables all default
+    shortuts from the system menu (Alt+F7, Alt+F10 etc.) so that they available
+    to Qt applications now. Exceptions are Alt+F4, Ctrl+Esc, Alt+Esc which are
+    not passed to Qt and will function as in regular PM applciations.
+
+  - general: Binary Qt library builds are made portable: they do not contain
+    hard-coded paths to various Qt components any more and use relative
+    locations whenever possible. See
+    http://svn.netlabs.org/qt4/browser/tags/4.5.1-os2-beta5/doc/src/qt-conf.qdoc
+    for more info.
+
+  - corelib: Improved the polling QFileSystemWatcher implementation so that it
+    doesn't eat all CPU when there are more than 100 items to watch, like when
+    showing a file open dialog with many files in a directory.
+
+  - qmake: Improved processing of the project library list (LIBS variable) to
+    avoid appearance of raw library names that require substitution (fixes the
+    debug build of linguist).
+
+  - qmake: Added support for DEF_FILE_VERSION, DEF_FILE_DESCRIPTION and
+    DEF_FILE_VENDOR project variables that allow to embed the description
+    string into a generated DLL or executable. For compatibility with other
+    platforms, these variables by default are mapped to VERSION,
+    QMAKE_TARGET_PRODUCT + QMAKE_TARGET_DESCRIPTION + QMAKE_TARGET_COPYRIGHT and
+    QMAKE_TARGET_COMPANY, respectively.
+
+  Fixes:
+
+  - gui: Table views showed alternate rows in black color instead of light gray.
+
+  - gui: If some font style (e.g. Bold) does not provide characters for some
+    script (e.g. Cyrillic) while the Normal style does, a different font will be
+    chosen for Bold Cyrillic instead of drawing empty boxes.
+
+  - corelib: Fixed two issues related to loading text codec plugins from the
+    application's directory.
+
+  - corelib: Fixed QDir::absoluteFilePath(), midir()/mkpath(), rmdir()/rmpath()
+    that didn't properly handle relative and UNC paths which could cause various
+    path-related failures.
+
+  - corelib: Properly report root directories of drives to Qt. This makes
+    letters of removable drives always seen by Qt (for example, in the file open
+    dialog) even if the medium isn't currently inserted.
+
+  - corelib: Fixed unnecessary access to removable drives and a long delay and
+    noice caused by it when showing a file open dialog in Qt applications.
+
+
+Beta 4 (11-11-2009)
+
+  Improvements:
+
+  - Added sound support (implemented QSound class).
+
+  - Added system tray support (QSystemTrayIcon class). This support requires
+    the Extended system tray XCenter plugin to be installed. See the note above
+    on how to compile and install this plugin.
+
+  - Enabled QPlugin support on OS/2. This in turn enables SVG support for
+    QIcon (which is built as a Qt plugin DLL by default).
+
+  - Better widget modality support (widgets blocked by modality cannot be
+    activated and moved using the mouse and the title bar anymore).
+
+  - Added support for 'console' and 'windows' CONFIG options in .pro files.
+    Now, if 'windows' is present, the target executable will have the WINDOWAPI
+    attribute set which effectively makes it a PM application. This, in
+    particular, disables standard input, output and error streams so that when
+    started, the application will not have a console window attached to it.
+    By default, 'console' mode is active unless you perform a release build and
+    the application is linked against the QtGui library ('QT = gui' in .pro),
+    in which case the default is 'windows'.
+
+  - Improved paint speed in Qt windows which should increase overall graphical
+    UI performance by 10%-20% in Qt4 applications.
+
+  - Implemented setting window icons for top-level windows (using
+    QWidget::setWindowIcon()).
+
+  - Added LxLite support to provide compression for executables and DLLs. The
+    compression is controlled by the 'exepack' CONFIG option which is turned on
+    by default for release builds if the LxLite executable is present in PATH
+    during the configure.cmd invocation. The compression may be turned off on a
+    per-project basis by adding a 'CONFIG -= exepack' line to the .pro file.
+
+  - Improved the section of this README.OS2 file that describes how to properly
+    set the LANG variable to have correct national characters in file names and
+    in window titles of Qt applications.
+
+  Fixes:
+
+  - QProcess: The executable's path was not always added to BEGINLIBPATH.
+
+  - Fixed-size top-level widgets could not be moved.
+
+  - Application crash after pressing a button in a dialog window that resizes
+    this dialog (for example, makes it bigger to show more information).
+
+  - Resizing top level windows using the top border broke mouse coordinates so
+    that Qt tought you pressed the mouse button in a different place of the
+    window than where you actually did it.
+
+  - Events posted with QCoreApplication::postEvent() were only processed upon
+    receiving a next message from the system. This caused funny delays such as
+    controls in a Qt window still indicating the input focus (the dotted
+    rectangle) after the window was deactivated and losing this indication only
+    when the mouse pointer was moved over the window.
+
+  - Don't replay mouse button press on a push button that is showing a popup
+    menu but instead hide the popup menu and unpress the button to get more
+    native look and feel.
+
+  - Deactivating the window with a push button showing a popup menu would hide
+    the popup but leave the button pressed.
+
+  - Fixed incorrect Qt dirty widget region calculation when processing WM_PAINT
+    messages. This fixes a lot of redraw problems (menu items in the main menu
+    bar, text in combo-boxes, various redraw problems in smplayer when switching
+    interfaces and going to/from fullscreen, and similar).
+
+
+Beta 3 (17-10-2009)
+
+  Improvements:
+
+  - Added proper font support. All outline (scalable) fonts visible in the Font
+    Palette should be now recognized by Qt. The fonts are hinted and antialiased
+    using the Freetype2 library when drawing text.
+
+  - System fonts and colors are now used by default for Qt widgets.
+
+  - configure.cmd now generates the main Makefile to simplify building of Qt.
+
+  - corelib: QProcess: Implemented child termination detection.
+
+  - corelib: QProcess: Implemented redirection to another QProcess.
+
+  - corelib: QProcess now uses native pipes for stream redirection. This fixes
+    various issues like 'Socket operation on non-socket' errors during
+    parent-child communication.
+
+  - corelib: QProcess: Make sure that the directory containing the executable
+    file is always searched (first) for DLLs needed by this executable. This
+    makes it unnecessary to change the current directory to the executable's
+    directory or add it to LIBPATH before starting the Qt application.
+
+  - corelib: QProcess can now start applications of different type (e.g. PM
+    applications from text-mode applications) directly.
+    QProcess::startDetached() also works.
+
+  - qmake: In debug_and_release mode, 'release-(all|clean|distclean|install|
+    uninstall)' and 'debug-(all|clean|distclean|install|uninstall)' make
+    targets are now available.
+
+  Fixes:
+
+  - Doing 'make clean' could result into a hang due to CMD.EXE command line
+    length limitation.
+
+  - corelib: Fixed: QProcess: Lost data during stream redirection.
+
+  - corelib: QSettings could sometimes distort data when saving it to the
+    registry (by replacing some characters with codes 0x80 and above with '?').
+
+
+Beta 2 (17-09-2009)
+
+  Improvements:
+
+  - Ported the network module (QtNetwork4.dll) and added to the default build.
+
+  - Added modules sql, svg, xmlpatterns, scripttools, plugins to the default
+    build.
+
+  - gui: Added recognition of dead keys which makes it possible to type
+    umlauts and other accented characters that require composition.
+
+  - gui: Implemented standard cursor shapes in Qt applications.
+
+  Fixes:
+
+  - qmake: Fixed the trailing slash problem which caused qmake to generate
+    incorrect makefiles and fail to build the Qt library on some platforms.
+
+  - configure.cmd: Return to the root source tree directory after building
+    qmake.
+
+  - qmake: Automatically use different link flags when linking qmake with WLINK.
+
+  - qmake: Recognize TARGET_SHORT that allows to specify a short DLL name
+    (vital for OS/2 which reqires DLL names to be in 8x3 format).
+
+  - build: Set short DLL names for Qt modules on OS/2 using TARGET_SHORT.
+
+  - corelib: Various fixes to file system classes that deal with the file name
+    case (which should be ignored on OS/2) and forward and back slashes.
+
+  - corelib: Fixed: QMutex could let more than one thread access the protected
+    resource.
+
+  - corelib: Standard stream redirection in QProcess should now work for
+    kLIBC-based child processes. Redirection for all other applications
+    (such as CMD.EXE) will be added later (seems to be a kLIBC bug/feature).
+
+  - gui: Fixed erroneous QFileDialog behavior (duplicate entires in the list,
+    incomplete contents of the root directory of the current drive).
+
+  - gui: Fixed: Ctrl+A..Z should generate characters with codes 0x01-0x1F.
+
+  - gui: Fixed: Close popups when resizing/moving the top level window.
+
+  - gui: Enabled actual enforcing min/max Qt widget constraints for top-level windows.
+
+  - gui: Fixed child widget duplication when resizing top level widgets after
+    showing a popup; moving native child widgets should now work correctly.
+    This also fixed a number of redraw problems (for example, drawing the main
+    menu and tool bars in smplayer, moving tool bars around in other
+    applications such as textedit from the demo folder).
+
+
+Beta 1 (29-08-2009)
+
+  - First public release.
